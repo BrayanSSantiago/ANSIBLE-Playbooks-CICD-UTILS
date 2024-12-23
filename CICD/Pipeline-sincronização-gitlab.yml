@@ -1,0 +1,17 @@
+stages:
+  - deploy
+
+deploy_job:
+  stage: deploy
+  tags:
+    - Ansible deploy
+  script:
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H 152.84.126.27 >> ~/.ssh/known_hosts
+    - rsync -avz --delete ./ root@152.84.126.27:/etc/ansible/
+  only:
+    - main
+
+
