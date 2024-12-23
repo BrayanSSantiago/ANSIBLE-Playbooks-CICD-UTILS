@@ -1,1 +1,27 @@
+                                                                   
+on:
+  push:
+    branches:
+      - main  # Executa a sincronização apenas quando há commits na branch master
+
+jobs:
+  sync:
+    name: Sync Files to Remote Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3  # Baixa o código do repositório
+
+      - name: Configurar chave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.Secret-password }}" > ~/.ssh/id_rsa # variavel armazenada no variables do github no diretorio
+          chmod 600 ~/.ssh/id_rsa
+          eval "$(ssh-agent -s)"  # Inicia o ssh-agent
+          ssh-add ~/.ssh/id_rsa
+
+      - name: Synchronize Files with Rsync
+        run: |
+          rsync -avz --delete ./ {Usuario}@{IP-do-server}:/etc/ansible/
 
