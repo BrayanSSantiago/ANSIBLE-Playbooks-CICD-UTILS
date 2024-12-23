@@ -9,8 +9,8 @@ deploy_job:
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - ssh-keyscan -H 152.84.126.27 >> ~/.ssh/known_hosts
-    - rsync -avz --delete ./ root@152.84.126.27:/etc/ansible/
+    - ssh-keyscan -H "{ip_do_server}" >> ~/.ssh/known_hosts
+    - rsync -avz --delete ./ {usuario}@{ip_do_server}:/etc/ansible/
   only:
     - main
 
