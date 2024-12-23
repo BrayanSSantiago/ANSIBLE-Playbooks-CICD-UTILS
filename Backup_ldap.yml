@@ -1,0 +1,31 @@
+- name: Backup LDAP Database with Incremental Backups
+  hosts: ldap_hosts
+  become: true
+  vars:
+    backup_dir: "/var/backups/ldap"  # Diretório de backup no servidor remoto
+    timestamp: "{{ ansible_date_time.iso8601 }}"  # Timestamp único para o backup
+  tasks:
+    - name: Ensure remote backup directory exists
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Perform LDAP backup using slapcat
+      command: slapcat -v -l "{{ backup_dir }}/ldap_backup_{{ inventory_hostname }}_{{ timestamp }}.ldif"
+      register: backup_result
+      changed_when: "'backup completed' in backup_result.stdout"
+
+    - name: Verify the backup file exists
+      stat:
+        path: "{{ backup_dir }}/ldap_backup_{{ inventory_hostname }}_{{ timestamp }}.ldif"
+      register: backup_file
+      failed_when: not backup_file.stat.exists
+
+    - name: Fetch the backup file to the control machine
+      fetch:
+        src: "{{ backup_dir }}/ldap_backup_{{ inventory_hostname }}_{{ timestamp }}.ldif"
+        dest: "./ldap_backups/"
+        flat: yes
